@@ -72,15 +72,14 @@ add_library(${MAIN_LIBRARY_NAME} STATIC)
 add_executable(${MAIN_EXECUTABLE_NAME}
     app/main.cpp
 )
+
 target_sources(${MAIN_LIBRARY_NAME}
     PRIVATE
-        src/Example.cpp
         src/IPv4Prefix.cpp
         src/TrafficQuery.cpp
         src/FirewallRule.cpp
         src/FirewallPolicy.cpp
         src/ScenarioInput.cpp
-        src/internal/Detail.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
