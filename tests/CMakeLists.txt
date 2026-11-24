@@ -2,6 +2,9 @@
 
 add_executable(${TESTS_EXECUTABLE_NAME}
     exemplu_test.cpp
+    firewall_rule_test.cpp
+    firewall_policy_test.cpp
+    scenario_input_test.cpp
 )
 
 target_link_libraries(${TESTS_EXECUTABLE_NAME} PRIVATE ${MAIN_LIBRARY_NAME})

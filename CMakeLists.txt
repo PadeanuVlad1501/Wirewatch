@@ -48,6 +48,13 @@ include(cmake/RegisterTests.cmake)
 #
 # FetchContent_MakeAvailable(SomeLib)
 
+include(FetchContent)
+FetchContent_Declare(nlohmann_json
+    SYSTEM
+    URL https://codeload.github.com/nlohmann/json/tar.gz/refs/tags/v3.12.0
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 ###############################################################################
 
 # External dependencies with find_package
@@ -68,6 +75,11 @@ add_executable(${MAIN_EXECUTABLE_NAME}
 target_sources(${MAIN_LIBRARY_NAME}
     PRIVATE
         src/Example.cpp
+        src/IPv4Prefix.cpp
+        src/TrafficQuery.cpp
+        src/FirewallRule.cpp
+        src/FirewallPolicy.cpp
+        src/ScenarioInput.cpp
         src/internal/Detail.cpp
 )
 
@@ -104,6 +116,7 @@ target_include_directories(${MAIN_LIBRARY_NAME} SYSTEM PRIVATE
 # Link libraries
 
 target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE ${MAIN_LIBRARY_NAME})
+target_link_libraries(${MAIN_LIBRARY_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
 # target_link_directories(${MAIN_EXECUTABLE_NAME} PRIVATE ${<SomeLib>_BINARY_DIR}/lib)
 # target_link_libraries(${MAIN_EXECUTABLE_NAME} <SomeLib>)

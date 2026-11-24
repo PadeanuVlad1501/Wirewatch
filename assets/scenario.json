@@ -1,0 +1,8 @@
+{
+  "proposal": { "rule_id": 1, "action": "BLOCK" },
+  "queries": [
+    { "src_ip": "10.10.10.42", "dst_ip": "10.10.20.10", "src_port": 50000, "dst_port": 88, "protocol": "TCP" },
+    { "src_ip": "10.10.10.42", "dst_ip": "10.10.20.10", "src_port": 50000, "dst_port": 445, "protocol": "TCP" },
+    { "src_ip": "10.10.10.42", "dst_ip": "10.10.20.10", "src_port": 50000, "dst_port": 3389, "protocol": "TCP" }
+  ]
+}

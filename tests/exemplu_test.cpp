@@ -1,53 +1,128 @@
-// Main ships no test framework on purpose: plain assert / static_assert only.
-// Full framework examples live on tests/gtest and tests/Boost-ext-ut branches.
-
-// assert() disappears when NDEBUG is defined (Release, RelWithDebInfo): the
-// binary would exit 0 having checked nothing, and CI would call that a pass.
-// Keep the checks on in every build type.
 #undef NDEBUG
 #include <cassert>
 #include <stdexcept>
+#include <sstream>
 
-#include "Example.h"      // the library under test; include/ comes from oop
+#include "IPv4Prefix.h"
+#include "TrafficQuery.h"
 
-static_assert(Example::limit > 0, "the invariant below assumes a positive limit");
+void testFirewallRule();
+void testFirewallPolicy();
+void testScenarioInput();
 
-// checked through the public interface only: the helper behind the invariant is
-// file-local in src/Example.cpp and cannot even be named here
 int main() {
-    Example e;
-    assert(e.value() == 0);
 
-    e.add(7);
-    assert(e.value() == 7);
-    e.add(-7);
-    assert(e.value() == 0);
+    IPv4Prefix prefix(0x0A0A0A2A, 24);
 
-    bool threw = false;
-    try {
-        e.add(-1);
-    } catch (const std::invalid_argument&) {
-        threw = true;
+    assert(prefix.contains(0x0A0A0AC8));
+    assert(!prefix.contains(0x0A0A0B01));
+
+
+    bool exception1Caught = false;
+
+    try{
+        IPv4Prefix invalid_object1(0x0A0A0A2A, 33);
     }
-    assert(threw && "add() must refuse to go below 0");
-    assert(e.value() == 0 && "a failed call leaves the object untouched");
-
-    threw = false;
-    try {
-        e.add(Example::limit + 1);
-    } catch (const std::invalid_argument&) {
-        threw = true;
+    catch (const std::invalid_argument&)
+    {
+        exception1Caught = true;
     }
-    assert(threw && "add() must refuse to go above limit");
 
-    threw = false;
+    bool exception2Caught = false;
     try {
-        Example broken{Example::limit + 1};
-        (void) broken;
-    } catch (const std::invalid_argument&) {
-        threw = true;
+        IPv4Prefix invalid_object2(0x0A0A0A2A, -1);
     }
-    assert(threw && "the constructor must not hand out a broken object either");
+    catch (const std::invalid_argument&)
+    {
+        exception2Caught = true;
+    }
 
+    assert(exception1Caught);
+    assert(exception2Caught);
+
+
+    IPv4Prefix prefix1(0x0A0A0A2A, 0);
+    IPv4Prefix prefix2(0x0A0A0A2A, 32);
+
+    assert(prefix1.contains(0xC0000201));
+    assert(prefix2.contains(0x0A0A0A2A));
+    assert(!prefix2.contains(0x0A0A0A2B));
+
+    std::ostringstream outputPrefix;
+
+    outputPrefix<<prefix;
+
+    assert(outputPrefix.str() == "10.10.10.0/24");
+
+    outputPrefix.str("");
+
+    outputPrefix<<prefix1;
+
+    assert(outputPrefix.str() == "0.0.0.0/0");
+
+    outputPrefix.str("");
+
+    outputPrefix<<prefix2;
+
+    assert(outputPrefix.str() == "10.10.10.42/32");
+
+    outputPrefix.str("");
+
+
+    TrafficQuery query1(
+    0x0A0A0A2A,
+    0x0A0A140A,
+    50000,
+    88,
+    Protocol::TCP
+    );
+
+
+    std::ostringstream outputQuery;
+
+    outputQuery<<query1;
+
+    assert(outputQuery.str() == "TCP 10.10.10.42:50000 -> 10.10.20.10:88");
+
+
+    bool exception2_caught = false, exception3_caught = false;
+
+    try
+    {
+        TrafficQuery query2(
+        0x0A0A0A2A,
+        0x0A0A140A,
+        -1,
+        88,
+        Protocol::TCP
+        );
+    }
+    catch(const std::invalid_argument&)
+    {
+        exception2_caught  = true;
+    }
+
+    try
+    {
+        TrafficQuery query3(
+        0x0A0A0A2A,
+        0x0A0A140A,
+        50000,
+        65536,
+        Protocol::TCP
+        );
+    }
+    catch(const std::invalid_argument&)
+    {
+        exception3_caught  = true;
+    }
+
+    assert(exception2_caught);
+    assert(exception3_caught);
+
+
+    testFirewallRule();
+    testFirewallPolicy();
+    testScenarioInput();
     return 0;
 }

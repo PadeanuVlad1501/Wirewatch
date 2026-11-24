@@ -1,0 +1,21 @@
+{
+  "default_action": "BLOCK",
+  "rules": [
+    {
+      "id": 1,
+      "src_prefix": "10.10.10.0/24",
+      "dst_prefix": "10.10.20.10/32",
+      "protocol": "TCP",
+      "dst_port": 88,
+      "action": "ALLOW"
+    },
+    {
+      "id": 2,
+      "src_prefix": "10.10.10.0/24",
+      "dst_prefix": "10.10.20.10/32",
+      "protocol": "TCP",
+      "dst_port": 445,
+      "action": "ALLOW"
+    }
+  ]
+}

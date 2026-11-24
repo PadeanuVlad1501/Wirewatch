@@ -1,4 +1,63 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# Wirewatch
+
+Wirewatch este un evaluator de politici firewall scris in C++23. Citeste o
+politica si un scenariu din fisiere JSON, aplica o modificare pe o copie a
+politicii si compara verdictul pentru aceleasi cereri de trafic.
+
+In Milestone 1, o cerere descrie trafic IPv4 TCP sau UDP intr-un singur sens.
+Prima regula care se potriveste decide verdictul. Daca nicio regula nu se
+potriveste, se aplica actiunea implicita. Raportul indica regula sau actiunea
+implicita care a produs fiecare verdict. Rezultatul descrie permisiunea
+conform politicii analizate. Rutarea si disponibilitatea serviciului raman
+in afara analizei M1.
+
+## Pornire rapida
+
+Este necesar CMake 3.28 sau mai nou si un compilator cu suport C++23.
+La prima configurare, CMake descarca `nlohmann/json` v3.12.0.
+
+Din radacina repository-ului:
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --parallel 6
+ctest --test-dir build --output-on-failure
+./build/oop_main
+```
+
+Implicit, aplicatia citeste `assets/policy.json` si `assets/scenario.json`.
+Pentru a folosi alte fisiere, transmite ambele cai:
+
+```sh
+./build/oop_main assets/policy.json assets/scenario.json
+```
+
+## Scenariul demonstrativ M1
+
+`assets/policy.json` contine actiunea implicita si regulile in ordinea de
+evaluare. `assets/scenario.json` contine cererile si actiunea propusa pentru
+o regula identificata dupa ID. Datele demonstrative sunt sintetice.
+
+Propunerea schimba actiunea regulii #1 din `ALLOW` in `BLOCK`.
+
+| Cerere | Politica initiala | Politica propusa |
+|---|---|---|
+| TCP/88 | `ALLOW` prin regula #1 | `BLOCK` prin regula #1 |
+| TCP/445 | `ALLOW` prin regula #2 | `ALLOW` prin regula #2 |
+| TCP/3389 | `BLOCK` implicit | `BLOCK` implicit |
+
+Aplicatia raporteaza un verdict schimbat din trei. La final reseteaza
+propunerea prin atribuirea politicii initiale, iar cererea catre TCP/88
+revine la `ALLOW`.
+
+## Organizarea proiectului
+
+- `include/` contine interfetele publice ale bibliotecii.
+- `src/` contine modelul, evaluarea, comparatia si importul JSON.
+- `app/` contine aplicatia de consola care ruleaza scenariul si afiseaza raportul.
+- `assets/` contine datele demonstrative.
+- `tests/` verifica regulile, prioritatea lor, copierea politicii,
+  comparatia si respingerea datelor invalide.
 
 ### Folosiți template-ul corespunzător grupei voastre!
 
@@ -33,8 +92,8 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 
 ### Tema 0
 
-- [ ] Nume proiect (poate fi schimbat ulterior)
-- [ ] Scurtă descriere a temei alese, ce v-ați propus să implementați
+- [x] Nume proiect (poate fi schimbat ulterior)
+- [x] Scurtă descriere a temei alese, ce v-ați propus să implementați
 
 ## Tema 1
 
@@ -207,3 +266,9 @@ The [template repository](https://github.com/mcmarius/oop-template) itself is li
 ## Resurse
 
 - adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit
+- [nlohmann/json v3.12.0](https://github.com/nlohmann/json/releases/tag/v3.12.0)
+  este folosit pentru citirea politicii si a scenariului din JSON.
+- Am implementat clasele de baza si primele teste de domeniu. Am folosit Codex
+  pentru indrumare si review, apoi pentru modificari la `EvaluationResult` si
+  `FirewallPolicy`, comparatia pe lot, importul JSON, aplicatia demonstrativa
+  si testele aferente.
